@@ -250,7 +250,18 @@ BankAccount ** readAccounts()
 	 
     while (inputFile && (counter < K_SizeMax - 1)){
         // YOU HAVE TO DO SOMETHING FROM HERE !!!
-	
+	if (TypeRead == 3) {
+		DepositAccount* newPerson = new DepositAccount(accountRead,TypeRead,nameRead,dateRead,balanceRead,nbyearRead);
+		listAccounts[counter++] = newPerson;
+	}
+	else if (TypeRead == 4) {
+		LoanAccount* newPerson = new LoanAccount(accountRead,TypeRead,nameRead,dateRead,balanceRead,nbyearRead,RateRead);
+		listAccounts[counter++] = newPerson;
+	}
+	else {
+		BankAccount* newPerson = new BankAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead);
+		listAccounts[counter++] = newPerson;
+	}
 
 	
 	
