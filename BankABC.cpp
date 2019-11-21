@@ -14,6 +14,8 @@
 //          - Updating client accounts
 //
 //************************************************************************
+
+
 #include <iostream>
 #include <stdio.h>
 #include <fstream>
@@ -72,7 +74,7 @@ inline void BankAccount::setClientName(char * name)
           delete [] clientName;
      }
      clientName = new char[strlen(name) + 1];
-     strcpy(clientName, name);
+	 strcpy(clientName, name);
 }
 
 inline void BankAccount::setUpdateDate(long newDate)
@@ -206,6 +208,32 @@ void sortAccounts(BankAccount ** list)
 {
 
 
+	
+
+	for (int i = 0; i < 5; i++) {
+
+		long op1 = list[i]->getAccountId();
+		long op2 = list[i + 1]->getAccountId();
+
+		if (op1 > op2) {
+			BankAccount* temp = list[i];
+			list[i] = list[i + 1];
+			list[i + 1] = temp;
+		}
+	}
+
+	for (int i = 0; i < 5; i++) {
+		long op1 = list[i]->getType();
+		long op2 = list[i + 1]->getType();
+		long op3 = list[i]->getType();
+		long op4 = list[i + 1]->getType();
+
+		if ((op1 == op2) && (op3 > op4)) {
+			BankAccount* temp = list[i];
+			list[i] = list[i + 1];
+			list[i + 1] = temp;
+		}
+	}
 
 
 
@@ -249,34 +277,23 @@ BankAccount ** readAccounts()
     inputFile.getline(nameRead, 60);
 	 
     while (inputFile && (counter < K_SizeMax - 1)){
-        // YOU HAVE TO DO SOMETHING FROM HERE !!!
-	if (TypeRead == 3) {
-		DepositAccount* newPerson = new DepositAccount(accountRead,TypeRead,nameRead,dateRead,balanceRead,nbyearRead);
-		listAccounts[counter++] = newPerson;
-	}
-	else if (TypeRead == 4) {
-		LoanAccount* newPerson = new LoanAccount(accountRead,TypeRead,nameRead,dateRead,balanceRead,nbyearRead,RateRead);
-		listAccounts[counter++] = newPerson;
-	}
-	else {
-		BankAccount* newPerson = new BankAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead);
-		listAccounts[counter++] = newPerson;
-	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+			// YOU HAVE TO DO SOMETHING FROM HERE !!!
 
-        // UNTIL THIS POINT.
+			if (TypeRead == 03) {
+				*pAccount = new DepositAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead);
+			}
+			else {
+				if (TypeRead == 04) {
+					balanceRead = balanceRead + ((balanceRead * nbyearRead * RateRead) / 36000);
+					*pAccount = new LoanAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead, RateRead);
+				}
+				else {
+					*pAccount = new BankAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead);
+				}
+			}
+
+			// UNTIL THIS POINT.
 
           inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead >> RateRead;
           inputFile.getline(nameRead, 60);
