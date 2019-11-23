@@ -418,15 +418,22 @@ void LoanAccount::executeTransaction(const Transaction trans)
 void updateAccounts(BankAccount ** listAccounts) {
      ifstream inputFile("transact.txt");	// Opening the input file
 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
+     int acc_id, acc_type, date, trans_code;
+     double amount;
+
+	while(inputFile){
+          inputFile>>acc_id>>acc_type>>date>>trans_code>>amount;
+          Transaction tran(acc_id, acc_type, date, trans_code, amount);
+     
+          for (int i = 0; i < 5; i++) {
+
+		     long id = listAccounts[i]->getAccountId();
+
+		     if (acc_id == id) {
+                    listAccounts[i]->executeTransaction(tran);
+		     }
+	     }
+     }  
 	 
 }
 
