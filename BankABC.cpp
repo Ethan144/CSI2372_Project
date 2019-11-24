@@ -22,6 +22,8 @@
 #include <cstring>
 #include <stdlib.h>
 #include <iomanip>
+#include<array>
+#include <string.h>
 
 #include "BankABC.h"
 
@@ -206,35 +208,63 @@ inline void Transaction::setAmount(double amountTr)
 //****************************************************************************
 void sortAccounts(BankAccount ** list)
 {
+//    vector<BankAccount*> listN;
+//    while(*list){
+//        listN.push_back(*list);
+//        //cout<<"x";
+//        *list++;
+//    }
+//    listN.pop_back();
+//
+//
+//
+//	for (int i = 0; i < listN.size(); i++) {
+//		long op1 = listN[i]->getAccountId();
+//		long op2 = listN[i + 1]->getAccountId();
+//
+//		if (op1 > op2) {
+//			BankAccount* temp = listN[i];
+//			listN[i] = listN[i + 1];
+//			listN[i + 1] = temp;
+//		}
+//	}
+//
+//	for (int i = 0; i < listN.size(); i++) {
+//		long op1 = listN[i]->getType();
+//		long op2 = listN[i + 1]->getType();
+//		long op3 = listN[i]->getType();
+//		long op4 = listN[i + 1]->getType();
+//
+//		if ((op1 == op2) && (op3 > op4)) {
+//			BankAccount* temp = listN[i];
+//			listN[i] = listN[i + 1];
+//			listN[i + 1] = temp;
+//		}
+//	}
+    for (int i = 0; i < 5; i++) {
 
+        long op1 = list[i]->getAccountId();
+        long op2 = list[i + 1]->getAccountId();
 
-	
+        if (op1 > op2) {
+            BankAccount* temp = list[i];
+            list[i] = list[i + 1];
+            list[i + 1] = temp;
+        }
+    }
 
-	for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
+        long op1 = list[i]->getType();
+        long op2 = list[i + 1]->getType();
+        long op3 = list[i]->getType();
+        long op4 = list[i + 1]->getType();
 
-		long op1 = list[i]->getAccountId();
-		long op2 = list[i + 1]->getAccountId();
-
-		if (op1 > op2) {
-			BankAccount* temp = list[i];
-			list[i] = list[i + 1];
-			list[i + 1] = temp;
-		}
-	}
-
-	for (int i = 0; i < 5; i++) {
-		long op1 = list[i]->getType();
-		long op2 = list[i + 1]->getType();
-		long op3 = list[i]->getType();
-		long op4 = list[i + 1]->getType();
-
-		if ((op1 == op2) && (op3 > op4)) {
-			BankAccount* temp = list[i];
-			list[i] = list[i + 1];
-			list[i + 1] = temp;
-		}
-	}
-
+        if ((op1 == op2) && (op3 > op4)) {
+            BankAccount* temp = list[i];
+            list[i] = list[i + 1];
+            list[i + 1] = temp;
+        }
+    }
 
 
 
@@ -271,20 +301,25 @@ BankAccount ** readAccounts()
     long accountRead, dateRead;
     int TypeRead, nbyearRead, counter = 0;
     double balanceRead, RateRead;
-    char nameRead[60];
+    char nameRead[60],lineRead[65],buffer[4];
 	 
-    inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead >> RateRead;
-    inputFile.getline(nameRead, 60);
-	 
-    while (inputFile && (counter < K_SizeMax - 1)){
-
+    inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead;
+    inputFile.getline(lineRead, 65);
+    strncpy(buffer, lineRead+1, 4);
+    RateRead=atof(buffer);
+    strncpy(nameRead,lineRead+5, 60);
+    while (!inputFile.eof() && (counter < K_SizeMax - 1)){
         // YOU HAVE TO DO SOMETHING FROM HERE !!!
 	if (TypeRead == 03 ) {
             *pAccount = new DepositAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead);   
         }
         else {
             if (TypeRead == 04 ) {
-                balanceRead = balanceRead + ((balanceRead * nbyearRead * RateRead) / 36000);
+                double dividend=36000.0;
+                double divisor=(balanceRead * nbyearRead * RateRead);
+                double result=divisor/dividend;
+                balanceRead = (double)balanceRead + result;
+                //balanceRead = balanceRead + ((balanceRead * nbyearRead * RateRead) / 36000);
                 *pAccount = new LoanAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead, RateRead);
             }
             else {
@@ -292,27 +327,20 @@ BankAccount ** readAccounts()
             }
          }
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-
         // UNTIL THIS POINT.
 
-          inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead >> RateRead;
-          inputFile.getline(nameRead, 60);
+//          inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead >> RateRead;
+//          inputFile.getline(nameRead, 60);
+        inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead;
+        inputFile.getline(lineRead, 65);
+        strncpy(buffer, lineRead+1, 4);
+        string bufferS=buffer;
+        RateRead=atof(buffer);
+        strncpy(nameRead,lineRead+5, 60);
           pAccount++;
           counter++;
     }
-     *pAccount = new BankAccount();
+     //*pAccount = new BankAccount();
      return listAccounts;
 }
 
@@ -417,19 +445,24 @@ void LoanAccount::executeTransaction(const Transaction trans)
 //*************************************************************************
 void updateAccounts(BankAccount ** listAccounts) {
      ifstream inputFile("transact.txt");	// Opening the input file
+    if (!inputFile)                    // If the file is not found...
+    {
+        cout << "File not found !!!" << endl;
+        exit(0);
+    }
 
      int acc_id, acc_type, date, trans_code;
      double amount;
-
-	while(inputFile){
+	while(true){
           inputFile>>acc_id>>acc_type>>date>>trans_code>>amount;
+        if(inputFile.eof()) break;
           Transaction tran(acc_id, acc_type, date, trans_code, amount);
      
-          for (int i = 0; i < 5; i++) {
+          for (int i = 0; i < 6; i++) {
 
 		     long id = listAccounts[i]->getAccountId();
-
 		     if (acc_id == id) {
+                 
                     listAccounts[i]->executeTransaction(tran);
 		     }
 	     }
@@ -446,201 +479,59 @@ void updateAccounts(BankAccount ** listAccounts) {
 void displayAccounts(BankAccount ** listAccounts)
 {
     cout << endl << endl << endl;
-    
     Bool find[K_SizeMax];
+    cout.precision(2);
+    std::cout.setf(std::ios::fixed);
     for(int k = 0; k < K_SizeMax; k++) {find[k] = FALSE;}
 
     cout << "                       THE REPORT OF THE BANK ACCOUNTS OF CLIENTS" << endl;
-    cout << "                       ------------------------------------------" << endl << endl;
-	
-    int i = 0;
-	
-
-	
-	
-	
-	
-	
-	
-	
-	
-}
-
-
-
-
-int main()
-{
-    BankAccount ** list = readAccounts();
-    sortAccounts(list);
-    displayAccounts(list);
-    updateAccounts(list);
-    cout << endl << endl;
-    cout << "               ************************************************" << endl;
-    cout << "               * REAFFICHAGE DES DONNEES APRES LA MISE A JOUR *" << endl;
-    cout << "               ************************************************" << endl;
-    displayAccounts(list);
-    cout << endl;
-
-
-			// YOU HAVE TO DO SOMETHING FROM HERE !!!
-
-			if (TypeRead == 03) {
-				*pAccount = new DepositAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead);
-			}
-			else {
-				if (TypeRead == 04) {
-					balanceRead = balanceRead + ((balanceRead * nbyearRead * RateRead) / 36000);
-					*pAccount = new LoanAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead, RateRead);
-				}
-				else {
-					*pAccount = new BankAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead);
-				}
-			}
-
-			// UNTIL THIS POINT.
-
-          inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead >> RateRead;
-          inputFile.getline(nameRead, 60);
-          pAccount++;
-          counter++;
-    }
-     *pAccount = new BankAccount();
-     return listAccounts;
-}
-
-
-
-
-
-//*****************************************************************************************
-// Purpose: This function validates whether the transaction code 
-//          corresponds to the correct account:
-//              - 01 ==> account (01: Check, 02: Savings, 03: Deposit and 04: Loan)
-//              - 02 ==> account (01: Check, 02: Savings)
-//              - 03 ==> account (01: Check).
-//
-// Inputs: trans (Type: Transaction) an instance of the Transaction class.
-// Outputs: true (Type bool) if the transaction matches one of the accounts listed above.
-// false (Type bool) otherwise.
-//*****************************************************************************************
-Bool BankAccount::validateTransaction(const Transaction trans) const
-{
-    if ( ( (trans.getCode() == 02) && ( isDepositAccount() || isLoanAccount()) ) ||
-         ( (trans.getCode() == 03) && ( isDepositAccount() || isLoanAccount() || isSavingsAccount() ) ) )
-      {
-       return FALSE;
-      }
-    else
-      {
-       return TRUE;
-      }
-        
-}
-
-
-
-
-
-//******************************************************************************
-// Purpose: This function is used to execute the transaction already performed 
-// (update the balance of an account).
-//
-// Inputs: trans (Transaction Type), instance of Transaction class
-// Outputs: Nothing
-//*******************************************************************************
-void BankAccount::executeTransaction(const Transaction trans)
-{
-     if (validateTransaction(trans))
-       {
-         if (trans.getCode() == 01)    // Deposit
-           {
-             setBalance(getBalance() + trans.getAmount());
-           }
-         else 
-           { if (trans.getCode() == 02)    // Withdrawal
-                {
-                  if (getBalance() >= trans.getAmount())
-                     { setBalance(getBalance() - (trans.getAmount() + 0.50)); }
-                  else {cout << " insufficient balance!! " << endl; }
-                }
-             else 			// Check
-                {
-                  if (getBalance() >= trans.getAmount())
-                     { 
-                       setBalance(getBalance() - trans.getAmount());
-                     }
-                  else {cout << " insufficient balance!! " << endl; }
-                }
-           }
-                 
-       }   
- 
-}
-
-//***********************************************************************
-// Purpose: This function is used to execute a read transaction
-// (updating the balance of the loan account).
-//
-// Inputs: trans (Transaction Type), instance of the Transaction class
-// Outputs: Nothing
-//***********************************************************************
-void LoanAccount::executeTransaction(const Transaction trans)
-{
-     if (validateTransaction(trans))
-     {
-        if (trans.getCode() == 01)    // Deposit
-        {
-          setBalance(getBalance() - trans.getAmount());
-         
+    cout << "                       ------------------------------------------" << endl;
+    int i=0;
+    while(i<6){
+        int tempYears=0;
+        double tempRate=0;
+        if(listAccounts[i]->isLoanAccount()){
+            LoanAccount* temp=dynamic_cast<LoanAccount*>(listAccounts[i]);
+            tempYears=temp->getNbYears();
+            tempRate=temp->getRate();
         }
-     }
-}
-
-
-
-
-
-//*************************************************************************
-// Purpose: This function allows to read the file 'transact.txt' 
-//          and to update the accounts concerned by the transactions read.
-//
-// Inputs: listAccount (type BankAccount *), the list of bank accounts.
-// Output: Nothing.
-//*************************************************************************
-void updateAccounts(BankAccount ** listAccounts) {
-     ifstream inputFile("transact.txt");	// Opening the input file
-
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-}
-
-//******************************************************************************
-// Purpose: This function displays the list of bank accounts for all customers.
-//
-// Inputs: listAccount (type: BankAccount *), the list of bank accounts.
-// Outputs: Nothing
-//******************************************************************************
-void displayAccounts(BankAccount ** listAccounts)
-{
-    cout << endl << endl << endl;
-    
-    Bool find[K_SizeMax];
-    for(int k = 0; k < K_SizeMax; k++) {find[k] = FALSE;}
-
-    cout << "                       THE REPORT OF THE BANK ACCOUNTS OF CLIENTS" << endl;
-    cout << "                       ------------------------------------------" << endl << endl;
-	
-    int i = 0;
-	
+        else if(listAccounts[i]->isDepositAccount()){
+            DepositAccount* temp=dynamic_cast<DepositAccount*>(listAccounts[i]);
+            tempYears=temp->getNbYears();
+            tempRate=temp->getRate();
+        }
+        cout<<endl;
+        cout << "                 Client Name:" <<listAccounts[i]->getClientName()<< endl << endl;
+        cout << "Bank Account \t"<<"Type \t"<<"Update Date "<<"Balance \t"<<"Nb.Years "<<"Rate"<<endl;
+        cout<<listAccounts[i]->getAccountId()<<"\t\t\t"<<listAccounts[i]->getType()<<"\t\t"<<listAccounts[i]->getUpdatedate()<<"\t\t"<<listAccounts[i]->getBalance()<<"\t\t"<<tempYears<<"\t\t"<<tempRate;
+        cout<<endl;
+        long temp=listAccounts[i]->getAccountId();
+        double runningSum=listAccounts[i]->getBalance();
+        
+        i++;
+        if(i>5){
+            break;
+        }
+        while(temp==listAccounts[i]->getAccountId()){
+            if(listAccounts[i]->isLoanAccount()){
+                LoanAccount* temp=dynamic_cast<LoanAccount*>(listAccounts[i]);
+                tempYears=temp->getNbYears();
+            }
+            else if(listAccounts[i]->isDepositAccount()){
+                DepositAccount* temp=dynamic_cast<DepositAccount*>(listAccounts[i]);
+                tempYears=temp->getNbYears();
+            }
+            else{
+                tempYears=0;
+            }
+                cout<<listAccounts[i]->getAccountId()<<"\t\t\t"<<listAccounts[i]->getType()<<"\t\t"<<listAccounts[i]->getUpdatedate()<<"\t\t"<<listAccounts[i]->getBalance()<<"\t\t"<<tempYears<<"\t\t"<<tempRate;
+                cout<<endl;
+            runningSum+=listAccounts[i]->getBalance();
+            i++;
+        }
+        cout<<"\t\t Total Accounts "<<runningSum<<endl;
+    }
+cout<<"\t\t Total Accounts "<<listAccounts[i-1]->getBalance()<<endl;
 
 	
 	
@@ -651,8 +542,6 @@ void displayAccounts(BankAccount ** listAccounts)
 	
 	
 }
-
-
 
 
 int main()
@@ -667,7 +556,32 @@ int main()
     cout << "               ************************************************" << endl;
     displayAccounts(list);
     cout << endl;
-
-	system("PAUSE");
-	return 0;
+    system("PAUSE");
+    return 0;
+//
+//
+//			// YOU HAVE TO DO SOMETHING FROM HERE !!!
+//
+//			if (TypeRead == 03) {
+//				*pAccount = new DepositAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead);
+//			}
+//			else {
+//				if (TypeRead == 04) {
+//					balanceRead = balanceRead + ((balanceRead * nbyearRead * RateRead) / 36000);
+//					*pAccount = new LoanAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead, RateRead);
+//				}
+//				else {
+//					*pAccount = new BankAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead);
+//				}
+//			}
+//
+//			// UNTIL THIS POINT.
+//
+//          inputFile >> accountRead >> TypeRead >> dateRead >> balanceRead >> nbyearRead >> RateRead;
+//          inputFile.getline(nameRead, 60);
+//          pAccount++;
+//          counter++;
+//    }
+//     *pAccount = new BankAccount();
+//     return listAccounts;
 }
