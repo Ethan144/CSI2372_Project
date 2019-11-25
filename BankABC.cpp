@@ -525,6 +525,7 @@ void displayAccounts(BankAccount ** listAccounts)
             else if(listAccounts[i]->isDepositAccount()){
                 DepositAccount* temp=dynamic_cast<DepositAccount*>(listAccounts[i]);
                 tempYears=temp->getNbYears();
+		tempRate = temp->getRate();
             }
             else{
                 tempYears=0;
