@@ -311,6 +311,10 @@ BankAccount ** readAccounts()
     while (!inputFile.eof() && (counter < K_SizeMax - 1)){
         // YOU HAVE TO DO SOMETHING FROM HERE !!!
 	if (TypeRead == 03 ) {
+		double dividend=36000.0;
+                double divisor=(balanceRead * nbyearRead * 6.5);
+                double result=divisor/dividend;
+                balanceRead = (double)balanceRead + result;
             *pAccount = new DepositAccount(accountRead, TypeRead, nameRead, dateRead, balanceRead, nbyearRead);   
         }
         else {
@@ -461,7 +465,8 @@ void updateAccounts(BankAccount ** listAccounts) {
           for (int i = 0; i < 6; i++) {
 
 		     long id = listAccounts[i]->getAccountId();
-		     if (acc_id == id) {
+		     int type = listAccounts[i]->getType();
+		     if (acc_id == id && type == acc_type) {
                  
                     listAccounts[i]->executeTransaction(tran);
 		     }
